@@ -33,12 +33,23 @@
     [self.tableView registerNib:[UINib nibWithNibName:@"TweetsCell" bundle:nil] forCellReuseIdentifier:@"TweetsCell"];
     self.tableView.estimatedRowHeight = 68.0; // Needed!!!
     self.tableView.rowHeight = UITableViewAutomaticDimension;
+
+    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+    [refreshControl addTarget:self action:@selector(refresh:) forControlEvents:UIControlEventValueChanged];
+    [self.tableView addSubview:refreshControl];
     
     User *user = [User currentUser];
     if ( user != nil) {
         self.LoginButton.hidden = YES;
         NSLog(@"Welcome %@", user.name);
         //        self.window.rootViewController =[[TweetsViewController alloc]init];
+        
+        [[TwitterClient sharedInstance] homeTimelineWithParams:nil completion:^(NSArray *tweets, NSError *error) {
+            
+            [self.Tweets addObjectsFromArray:tweets];
+            [self.tableView reloadData];
+        }];
+        
     } else {
         self.LogoutButton.hidden = YES;
         NSLog(@"Not logged in");
@@ -46,16 +57,9 @@
     }
     
     // Do any additional setup after loading the view from its nib.
-    [[TwitterClient sharedInstance] homeTimelineWithParams:nil completion:^(NSArray *tweets, NSError *error) {
 
-        [self.Tweets addObjectsFromArray:tweets];
-
-        [self.tableView reloadData];
-    }];
     
-    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
-    [refreshControl addTarget:self action:@selector(refresh:) forControlEvents:UIControlEventValueChanged];
-    [self.tableView addSubview:refreshControl];
+
 
 }
 
@@ -70,7 +74,9 @@
     [User logout];
     self.LogoutButton.hidden = YES;
     self.LoginButton.hidden = NO;
-
+    NSLog(@"Logout & Clean!");
+    self.Tweets = nil;
+    [self.tableView reloadData];
 }
 
 - (IBAction)onLogin:(id)sender {
@@ -82,11 +88,18 @@
             //[self presentViewController:[[TweetsViewController alloc] init] animated:YES completion:nil];
             self.LoginButton.hidden = YES;
             self.LogoutButton.hidden = NO;
+            [[TwitterClient sharedInstance] homeTimelineWithParams:nil completion:^(NSArray *tweets, NSError *error) {
+                NSLog(@"Login & Loading...");
+                [self.Tweets addObjectsFromArray:tweets];
+                [self.tableView reloadData];
+            }];
             //[User currentUser]
         } else {
             //Present error view
         }
     }];
+    
+
     
 }
 
@@ -101,7 +114,7 @@
     Tweet *twitter = self.Tweets[indexPath.row];
     cell.tweetLabel.text = twitter.text;
     cell.userLabel.text = twitter.user.name;
-//    NSLog(@"%@", twitter.user.profileImageUrl);
+    NSLog(@"%@", twitter.user.profileImageUrl);
     [cell.thumbImageView setImageWithURL:[NSURL URLWithString:twitter.user.profileImageUrl]];
 
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
@@ -123,8 +136,8 @@
     
     [[TwitterClient sharedInstance] homeTimelineWithParams:nil completion:^(NSArray *tweets, NSError *error) {
         
+        NSLog(@"Refresh ...");
         [self.Tweets addObjectsFromArray:tweets];
-        
         [self.tableView reloadData];
     }];
     [refreshControl endRefreshing];

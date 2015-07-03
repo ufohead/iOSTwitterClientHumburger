@@ -85,6 +85,7 @@ NSString * const kTwitterBaseUrl = @"https://api.twitter.com";
                                
                         } failure:^(NSError *error) {
                             NSLog(@"failed to get the access token!");
+                            NSLog(@"error : %@", error);
                             self.loginCompletion(nil, error);
     }];
 
@@ -95,6 +96,7 @@ NSString * const kTwitterBaseUrl = @"https://api.twitter.com";
         NSArray *tweets = [Tweet tweetsWithArray:responseObject];
         
         completion(tweets,nil);
+        NSLog(@"Get Timeline successful");
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         completion(nil, error);
     }];
