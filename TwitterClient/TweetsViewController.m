@@ -53,6 +53,9 @@
         [self.tableView reloadData];
     }];
     
+    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
+    [refreshControl addTarget:self action:@selector(refresh:) forControlEvents:UIControlEventValueChanged];
+    [self.tableView addSubview:refreshControl];
 
 }
 
@@ -116,8 +119,16 @@
     return cell;
 }
 
-
-
+- (void)refresh:(UIRefreshControl *)refreshControl {
+    
+    [[TwitterClient sharedInstance] homeTimelineWithParams:nil completion:^(NSArray *tweets, NSError *error) {
+        
+        [self.Tweets addObjectsFromArray:tweets];
+        
+        [self.tableView reloadData];
+    }];
+    [refreshControl endRefreshing];
+}
 
 /*
 #pragma mark - Navigation
