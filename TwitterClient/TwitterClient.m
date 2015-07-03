@@ -9,6 +9,7 @@
 #import "TwitterClient.h"
 #import "Tweet.h"
 
+
 NSString * const kTwitterConsumerKey =@"i1FGB5bnYQhI5jEWPNDisXA9X";
 NSString * const kTwitterConsumerSecret = @"Z7f5nEQ98vSk5KOTnfJsWtuaFmiBPHWj7DIinMva5soiA6fg3x";
 NSString * const kTwitterBaseUrl = @"https://api.twitter.com";
@@ -18,6 +19,7 @@ NSString * const kTwitterBaseUrl = @"https://api.twitter.com";
 @property (nonatomic, strong) void (^loginCompletion)(User *user, NSError *error);
 
 @end
+
 
 @implementation TwitterClient
 
@@ -91,12 +93,78 @@ NSString * const kTwitterBaseUrl = @"https://api.twitter.com";
 - (void)homeTimelineWithParams:(NSDictionary *)params completion:(void (^)(NSArray *tweets, NSError *error))completion {
     [self GET:@"1.1/statuses/home_timeline.json" parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSArray *tweets = [Tweet tweetsWithArray:responseObject];
+        
         completion(tweets,nil);
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         completion(nil, error);
     }];
 
 
+}
+
+- (void)favorite:(NSString *)tweetId completion:(void (^)(Tweet *tweet, NSError *error))completion {
+    NSString *url = [NSString stringWithFormat:@"1.1/favorites/create.json?id=%@", tweetId];
+    [self POST:url parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        //NSLog(@"raw data is %@", responseObject);
+        Tweet *tweet = [[Tweet alloc] initWithDictionary:responseObject];
+        completion(tweet, nil);
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"[ERROR] %@ retrieval failed", url);
+        completion(nil, error);
+    }];
+}
+
+- (void)unfavorite:(NSString *)tweetId completion:(void (^)(Tweet *tweet, NSError *error))completion {
+    NSString *url = [NSString stringWithFormat:@"1.1/favorites/destroy.json?id=%@", tweetId];
+    [self POST:url parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        //NSLog(@"raw data is %@", responseObject);
+        Tweet *tweet = [[Tweet alloc] initWithDictionary:responseObject];
+        completion(tweet, nil);
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"[ERROR] %@ retrieval failed", url);
+        completion(nil, error);
+    }];
+}
+
+- (void)tweetDetail:(NSString *)tweetId completion:(void (^)(Tweet *tweet, NSError *error))completion {
+    NSString *url = [NSString stringWithFormat:@"1.1/statuses/show/%@.json?include_my_retweet=1", tweetId];
+    [self GET:url parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        //NSLog(@"raw data is %@", responseObject);
+        Tweet *tweet = [[Tweet alloc] initWithDictionary:responseObject];
+        completion(tweet, nil);
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"[ERROR] %@ retrieval failed", url);
+        completion(nil, error);
+    }];
+}
+
+- (void)deletTweete:(NSString *)tweetId completion:(void (^)(Tweet *tweet, NSError *error))completion {
+    NSString *url = [NSString stringWithFormat:@"1.1/statuses/destroy/%@.json?include_my_retweet=1", tweetId];
+    [self POST:url parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        //NSLog(@"raw data is %@", responseObject);
+        Tweet *tweet = [[Tweet alloc] initWithDictionary:responseObject];
+        completion(tweet, nil);
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"call %@ failed", url);
+        completion(nil, error);
+    }];
+}
+
+- (void)tweet:(NSString *)text repliesTo:(NSString *)idToBeReplied completion:(void (^)(Tweet *tweet, NSError *error))completion {
+    NSString *url = [NSString stringWithFormat:@"1.1/statuses/update.json"];
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithDictionary:@{@"status": text}];
+    if (idToBeReplied != nil) {
+        [params setValue:idToBeReplied forKey:@"in_reply_to_status_id"];
+    }
+    NSLog(@"TWitterClient on tweet");
+    [self POST:url parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        //NSLog(@"raw data is %@", responseObject);
+        Tweet *tweet = [[Tweet alloc] initWithDictionary:responseObject];
+        completion(tweet, nil);
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"[ERROR] %@ retrieval failed", url);
+        completion(nil, error);
+    }];
 }
 
 @end

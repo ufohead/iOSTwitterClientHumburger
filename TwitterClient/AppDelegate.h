@@ -7,6 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "User.h"
+#import "Tweet.h"
+#import "TwitterClient.h"
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 

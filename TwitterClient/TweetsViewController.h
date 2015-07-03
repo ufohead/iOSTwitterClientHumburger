@@ -8,6 +8,10 @@
 
 #import <UIKit/UIKit.h>
 
+
 @interface TweetsViewController : UIViewController
+
+@property (weak, nonatomic) IBOutlet UIButton *LogoutButton;
+@property (weak, nonatomic) IBOutlet UIButton *LoginButton;
 
 @end
