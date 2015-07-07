@@ -11,7 +11,8 @@
 
 @interface TweetsViewController : UIViewController
 
-@property (weak, nonatomic) IBOutlet UIButton *LogoutButton;
+//@property (weak, nonatomic) IBOutlet UIButton *LogoutButton;
 @property (weak, nonatomic) IBOutlet UIButton *LoginButton;
+@property (weak, nonatomic) IBOutlet UIButton *ComposeButton;
 
 @end

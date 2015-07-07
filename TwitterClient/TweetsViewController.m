@@ -40,7 +40,8 @@
     
     User *user = [User currentUser];
     if ( user != nil) {
-        self.LoginButton.hidden = YES;
+        [self.LoginButton setTitle:@"Logout" forState:UIControlStateNormal];
+        //self.LoginButton.hidden = YES;
         NSLog(@"Welcome %@", user.name);
         //        self.window.rootViewController =[[TweetsViewController alloc]init];
         
@@ -51,7 +52,8 @@
         }];
         
     } else {
-        self.LogoutButton.hidden = YES;
+        [self.LoginButton setTitle:@"Login" forState:UIControlStateNormal];
+        self.ComposeButton.hidden = YES;
         NSLog(@"Not logged in");
         //        self.window.rootViewController = [[LoginViewController alloc]init];
     }
@@ -68,36 +70,57 @@
     // Dispose of any resources that can be recreated.
 }
 
-
+/*
 - (IBAction)onLogout:(id)sender {
     
     [User logout];
-    self.LogoutButton.hidden = YES;
-    self.LoginButton.hidden = NO;
+    //self.LogoutButton.hidden = YES;
+    //self.LoginButton.hidden = NO;
     NSLog(@"Logout & Clean!");
     self.Tweets = nil;
     [self.tableView reloadData];
 }
+*/
 
 - (IBAction)onLogin:(id)sender {
     
-    [[TwitterClient sharedInstance] loginWithCompletion:^(User *user, NSError *error) {
-        if (user != nil) {
-            //Modally present tweets view
-            NSLog(@"Welcome to %@", user.name);
-            //[self presentViewController:[[TweetsViewController alloc] init] animated:YES completion:nil];
-            self.LoginButton.hidden = YES;
-            self.LogoutButton.hidden = NO;
-            [[TwitterClient sharedInstance] homeTimelineWithParams:nil completion:^(NSArray *tweets, NSError *error) {
-                NSLog(@"Login & Loading...");
-                [self.Tweets addObjectsFromArray:tweets];
-                [self.tableView reloadData];
-            }];
-            //[User currentUser]
-        } else {
-            //Present error view
-        }
-    }];
+    NSString *title = [(UIButton *)sender currentTitle];
+    if ([title isEqual: @"Login"]) {
+    
+        [[TwitterClient sharedInstance] loginWithCompletion:^(User *user, NSError *error) {
+            if (user != nil) {
+                //Modally present tweets view
+                NSLog(@"Welcome to %@", user.name);
+                //[self presentViewController:[[TweetsViewController alloc] init] animated:YES completion:nil];
+//                self.LoginButton.hidden = NO;
+                self.ComposeButton.hidden = NO;
+                [self.LoginButton setTitle:@"Logout" forState:UIControlStateNormal];
+//                self.LogoutButton.hidden = NO;
+                [[TwitterClient sharedInstance] homeTimelineWithParams:nil completion:^(NSArray *tweets, NSError *error) {
+                    NSLog(@"Login & Loading...");
+                    [self.Tweets addObjectsFromArray:tweets];
+                    [self.tableView reloadData];
+                }];
+                //[User currentUser]
+            } else {
+                //Present error view
+            }
+        }];
+        
+    }
+    else {
+        [User logout];
+        //self.LogoutButton.hidden = YES;
+        //self.LoginButton.hidden = NO;
+        self.ComposeButton.hidden = YES;
+        [self.LoginButton setTitle:@"Login" forState:UIControlStateNormal];
+        NSLog(@"Logout & Clean!");
+        self.Tweets = nil;
+        [self.tableView reloadData];
+    
+    }
+    
+
     
 
     
