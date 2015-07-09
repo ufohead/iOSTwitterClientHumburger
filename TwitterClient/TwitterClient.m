@@ -8,7 +8,7 @@
 
 #import "TwitterClient.h"
 #import "Tweet.h"
-
+#import "Profile.h"
 
 NSString * const kTwitterConsumerKey =@"i1FGB5bnYQhI5jEWPNDisXA9X";
 NSString * const kTwitterConsumerSecret = @"Z7f5nEQ98vSk5KOTnfJsWtuaFmiBPHWj7DIinMva5soiA6fg3x";
@@ -97,12 +97,25 @@ NSString * const kTwitterBaseUrl = @"https://api.twitter.com";
         
         completion(tweets,nil);
         NSLog(@"Get Timeline successful");
+        //NSLog(@"%@",responseObject);
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         completion(nil, error);
     }];
 
 
 }
+
+- (void)userTimelineWithParams:(NSDictionary *)params completion:(void (^)(NSArray *profiles, NSError *error))completion {
+    [self GET:@"1.1/statuses/user_timeline.json?count=1" parameters:params success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"Get User Profile");
+        //NSLog(@"%@",responseObject);
+        NSArray *profiles = [Profile profileWithArray:responseObject];
+        completion(profiles,nil);
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        completion(nil,error);
+    }];
+}
+
 
 - (void)favorite:(NSString *)tweetId completion:(void (^)(Tweet *tweet, NSError *error))completion {
     NSString *url = [NSString stringWithFormat:@"1.1/favorites/create.json?id=%@", tweetId];

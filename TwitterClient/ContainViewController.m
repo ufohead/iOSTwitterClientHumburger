@@ -10,6 +10,10 @@
 #import "TweetsViewController.h"
 #import "ProfileViewController.h"
 #import "PushViewController.h"
+#import "User.h"
+#import "TwitterClient.h"
+#import "Profile.h"
+#import "UIImageView+AFNetworking.h"
 
 @interface ContainViewController ()
 
@@ -19,7 +23,11 @@
 @property (weak, nonatomic) IBOutlet UIButton *pushButton;
 @property (weak, nonatomic) IBOutlet UIView *menuView;
 @property (weak, nonatomic) IBOutlet UIView *containView;
+@property (strong, nonatomic) IBOutlet UITapGestureRecognizer *ImageGesture;
 
+@property (weak, nonatomic) IBOutlet UIImageView *userImage;
+@property (weak, nonatomic) IBOutlet UILabel *userName;
+@property (weak, nonatomic) IBOutlet UILabel *userDesc;
 
 @property (strong, nonatomic) TweetsViewController *tweetsVC;
 @property (strong, nonatomic) ProfileViewController *profileVC;
@@ -29,7 +37,7 @@
 @implementation ContainViewController
 
 BOOL menuStatus;
-static int Width = 400;
+static int Width = 300;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -38,8 +46,26 @@ static int Width = 400;
     self.tweetsVC = [storyboard instantiateViewControllerWithIdentifier:@"tweetsVC"];
     self.profileVC = [storyboard instantiateViewControllerWithIdentifier:@"profileVC"];
     self.pushVC = [storyboard instantiateViewControllerWithIdentifier:@"pushVC"];
-    menuStatus = false;
-    [self switchMenu:nil];
+    //menuStatus = true;
+    //[self switchMenu:nil];
+    
+    [[TwitterClient sharedInstance] userTimelineWithParams:nil completion:^(NSArray *profiles, NSError *error) {
+        //NSLog(@"%@",profiles);
+        
+        Profile *MyProfile = profiles[0];
+        self.userName.text = [NSString stringWithFormat:@"%@", MyProfile.user.screenName];
+        self.userDesc.text = [NSString stringWithFormat:@"%@", MyProfile.user.tagline];
+        [self.userImage setImageWithURL:[NSURL URLWithString:MyProfile.user.profileImageUrl]];
+
+//        self.TweetsCount.text = [NSString stringWithFormat:@"%@", MyProfile.user.statuses_count];
+//        self.FollowersCount.text = [NSString stringWithFormat:@"%@", MyProfile.user.followers_count];
+//        self.FollowingCount.text = [NSString stringWithFormat:@"%@", MyProfile.user.friends_count];
+//        self.ScreenName.text = [NSString stringWithFormat:@"%@", MyProfile.user.screenName];
+//        [self.UserImage setImageWithURL:[NSURL URLWithString:MyProfile.user.profileImageUrl]];
+        
+    }];
+    
+    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -49,8 +75,9 @@ static int Width = 400;
 
 
 - (IBAction)tapButton:(id)sender {
-    if (sender == self.profileButton) {
+    if (sender == self.profileButton || sender == self.ImageGesture) {
         [self displayViewController:self.profileVC];
+        
     }
     if (sender == self.tweetsButton) {
         [self displayViewController:self.tweetsVC];
@@ -58,6 +85,7 @@ static int Width = 400;
     if (sender == self.pushButton) {
         [self displayViewController:self.pushVC];
     }
+    [self switchMenu:sender];
 }
 
 - (void)displayViewController:(UIViewController *)viewController {

@@ -51,6 +51,7 @@
             [self.tableView reloadData];
         }];
         
+        
     } else {
         [self.LoginButton setTitle:@"Login" forState:UIControlStateNormal];
         self.ComposeButton.hidden = YES;
@@ -137,7 +138,7 @@
     Tweet *twitter = self.Tweets[indexPath.row];
     cell.tweetLabel.text = twitter.text;
     cell.userLabel.text = twitter.user.name;
-    NSLog(@"%@", twitter.user.profileImageUrl);
+    //NSLog(@"%@", twitter.user.profileImageUrl);
     [cell.thumbImageView setImageWithURL:[NSURL URLWithString:twitter.user.profileImageUrl]];
 
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
